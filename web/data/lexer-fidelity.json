@@ -1,0 +1,236 @@
+{
+  "comparedFields": [
+    "kind",
+    "text",
+    "line",
+    "column",
+    "offset",
+    "length"
+  ],
+  "note": "Each corpus program's src/main.0 is re-tokenized by the browser lexer and compared, token by token and field by field, against the stream zero tokens --json produced for the same file. Agreement on this corpus is evidence of correctness on the constructs it uses, not a proof of equivalence with the native scanner.",
+  "compilerVersion": "0.3.4",
+  "programs": [
+    {
+      "program": "p01_hello",
+      "realTokens": 26,
+      "ourTokens": 26,
+      "countsMatch": true,
+      "compared": 26,
+      "matched": 26,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "main"
+      ],
+      "ourFunctions": [
+        "main"
+      ]
+    },
+    {
+      "program": "p02_arith",
+      "realTokens": 202,
+      "ourTokens": 202,
+      "countsMatch": true,
+      "compared": 202,
+      "matched": 202,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "add",
+        "main",
+        "mul",
+        "poly"
+      ],
+      "ourFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "add",
+        "main",
+        "mul",
+        "poly"
+      ]
+    },
+    {
+      "program": "p03_control",
+      "realTokens": 278,
+      "ourTokens": 278,
+      "countsMatch": true,
+      "compared": 278,
+      "matched": 278,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "count_down",
+        "main",
+        "sum_odds"
+      ],
+      "ourFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "count_down",
+        "main",
+        "sum_odds"
+      ]
+    },
+    {
+      "program": "p04_shapes",
+      "realTokens": 389,
+      "ourTokens": 389,
+      "countsMatch": true,
+      "compared": 389,
+      "matched": 389,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "budget",
+        "main",
+        "manhattan",
+        "settle"
+      ],
+      "ourFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "budget",
+        "main",
+        "manhattan",
+        "settle"
+      ]
+    },
+    {
+      "program": "p05_errors",
+      "realTokens": 247,
+      "ourTokens": 247,
+      "countsMatch": true,
+      "compared": 247,
+      "matched": 247,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "double_even",
+        "even_or_fallback",
+        "even_or_raise",
+        "main"
+      ],
+      "ourFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "double_even",
+        "even_or_fallback",
+        "even_or_raise",
+        "main"
+      ]
+    },
+    {
+      "program": "p06_memory",
+      "realTokens": 406,
+      "ourTokens": 406,
+      "countsMatch": true,
+      "compared": 406,
+      "matched": 406,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "__zero_test_3",
+        "main"
+      ],
+      "ourFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "__zero_test_3",
+        "main"
+      ]
+    },
+    {
+      "program": "p07_generics",
+      "realTokens": 198,
+      "ourTokens": 198,
+      "countsMatch": true,
+      "compared": 198,
+      "matched": 198,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "boxed_count",
+        "boxed_flag",
+        "main"
+      ],
+      "ourFunctions": [
+        "__zero_test_0",
+        "__zero_test_1",
+        "__zero_test_2",
+        "boxed_count",
+        "boxed_flag",
+        "main"
+      ]
+    },
+    {
+      "program": "p08_lexer",
+      "realTokens": 920,
+      "ourTokens": 920,
+      "countsMatch": true,
+      "compared": 920,
+      "matched": 920,
+      "exact": true,
+      "firstMismatch": null,
+      "functionsMatch": true,
+      "realFunctions": [
+        "bad_count",
+        "kind_at",
+        "main",
+        "number_end",
+        "number_value",
+        "operator_count",
+        "sum_numbers",
+        "token_count"
+      ],
+      "ourFunctions": [
+        "bad_count",
+        "kind_at",
+        "main",
+        "number_end",
+        "number_value",
+        "operator_count",
+        "sum_numbers",
+        "token_count"
+      ]
+    }
+  ],
+  "totals": {
+    "programs": 8,
+    "programsExact": 8,
+    "programsFunctionsMatch": 8,
+    "tokensCompared": 2666,
+    "tokensMatched": 2666,
+    "tokenAgreementPct": 100
+  }
+}
