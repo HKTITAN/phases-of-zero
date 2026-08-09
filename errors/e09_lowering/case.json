@@ -1,0 +1,1 @@
+{"phase":"lower","intent":"Semantically valid: a choice-typed parameter passes name resolution and type checking, but falls outside the MIR subset the backend can lower.","expectedCode":"BLD004"}

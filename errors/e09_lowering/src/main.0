@@ -1,0 +1,23 @@
+choice Outcome {
+    ok: i32,
+    err: i32,
+}
+
+fn settle(outcome: Outcome) -> i32 {
+    var score: i32 = 0
+    match outcome {
+        .ok(value) {
+            score = value
+        }
+        .err(code) {
+            score = 0 - code
+        }
+    }
+    return score
+}
+
+pub fn main(world: World) -> Void raises {
+    if settle(Outcome.ok(7)) == 7 {
+        check world.out.write("unreachable\n")
+    }
+}

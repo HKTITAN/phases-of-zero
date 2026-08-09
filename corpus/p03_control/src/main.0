@@ -1,0 +1,55 @@
+use lib
+
+// Sums the odd integers in 1..=n. Even candidates are skipped with `continue`
+// rather than nested inside an else branch, so the loop body stays flat.
+fn sum_odds(n: i32) -> i32 {
+    var i: i32 = 0
+    var total: i32 = 0
+    while i < n {
+        i = i + 1
+        if i % 2 == 0 {
+            continue
+        }
+        total = total + i
+    }
+    return total
+}
+
+// Steps `start` down toward zero one unit at a time, but never runs more than
+// `limit()` iterations: the guard breaks out early and reports whatever is
+// left, so a large input cannot spin the loop indefinitely.
+fn count_down(start: i32) -> i32 {
+    var remaining: i32 = start
+    var steps: i32 = 0
+    while remaining > 0 {
+        if steps == limit() {
+            break
+        }
+        remaining = remaining - 1
+        steps = steps + 1
+    }
+    return remaining
+}
+
+pub fn main(world: World) -> Void raises {
+    let leftover: i32 = count_down(limit() + 4)
+    if sum_odds(10) == 25 && leftover == 4 {
+        check world.out.write("control ok\n")
+    }
+}
+
+test "sum_odds skips the even candidates" {
+    expect sum_odds(10) == 25
+    expect sum_odds(1) == 1
+    expect sum_odds(0) == 0
+}
+
+test "count_down reaches zero inside the step budget" {
+    expect count_down(3) == 0
+    expect count_down(limit()) == 0
+}
+
+test "count_down stops early once the break guard trips" {
+    expect count_down(limit() + 4) == 4
+    expect count_down(20) == 12
+}

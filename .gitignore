@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.zero/
+*.tsbuildinfo
+.DS_Store
+.env*.local
+corpus/**/.zero/
+errors/**/.zero/

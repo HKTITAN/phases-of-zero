@@ -1,0 +1,4 @@
+pub fn main(world: World) -> Void raises {
+    let bad: i32 = 4 § 2
+    check world.out.write("unreachable\n")
+}

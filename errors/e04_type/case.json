@@ -1,0 +1,1 @@
+{"phase":"check","intent":"Name resolves to a real function; its i32 return cannot inhabit a String binding.","expectedCode":"TYP"}

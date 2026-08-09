@@ -1,0 +1,21 @@
+{
+  "name": "zero-compiler-phases",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Review paper on the phases of compiler design, with evidence captured from Zero 0.3.4",
+  "scripts": {
+    "capture": "node tools/capture.mjs",
+    "qr": "node tools/qr.mjs https://zero.khe.money",
+    "pdf": "node tools/pdf.mjs",
+    "epub": "node tools/epub.mjs",
+    "previews": "node tools/previews.mjs",
+    "assets": "node tools/assets.mjs",
+    "paper": "npm run capture && npm run qr && npm --prefix web run build && npm run pdf && npm run epub && npm run previews && npm run assets && npm --prefix web run build"
+  },
+  "devDependencies": {
+    "jszip": "^3.10.1",
+    "puppeteer": "^24.10.2",
+    "qrcode": "^1.5.4"
+  }
+}

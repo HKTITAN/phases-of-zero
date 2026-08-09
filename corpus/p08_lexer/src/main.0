@@ -1,0 +1,162 @@
+use lib
+
+// The scanner walks a byte span with an explicit cursor. Every loop is
+// bounded twice over: by the span length, and by `scan_budget` steps, so no
+// input can spin the scanner. Span indexing is bounds-checked and traps at
+// runtime, so every `src[index]` below sits under a proven `index < len`
+// guard rather than relying on the trap as a control-flow mechanism.
+
+// A buildable companion to `Token`: the same pair of fields, with the kind
+// carried as its runtime code so the pair can live in a local.
+type Scan {
+    kind: i32,
+    total: i64,
+}
+
+// Index just past the run of decimal digits starting at `start`. Returns
+// `start` unchanged when the byte at `start` is not a digit, so callers can
+// use the result as a progress test.
+fn number_end(src: Span<u8>, start: usize) -> usize {
+    let len: usize = std.mem.len(src)
+    var index: usize = start
+    while index < len {
+        if is_digit(src[index]) == false {
+            break
+        }
+        index = index + 1
+    }
+    return index
+}
+
+// Decimal value of the digit run in `[start, stop)`, folded left to right.
+// `stop` is clamped against the span length so a stale bound cannot index
+// past the end.
+fn number_value(src: Span<u8>, start: usize, stop: usize) -> i64 {
+    let len: usize = std.mem.len(src)
+    var index: usize = start
+    var value: i64 = 0
+    while index < stop {
+        if index >= len {
+            break
+        }
+        value = accumulate(value, digit_value(src[index]) as i64)
+        index = index + 1
+    }
+    return value
+}
+
+// Kind of the token that starts at `index`, or `kind_end` once the cursor
+// has walked past the last byte.
+fn kind_at(src: Span<u8>, index: usize) -> i32 {
+    let len: usize = std.mem.len(src)
+    if index >= len {
+        return kind_end
+    }
+    return classify(src[index])
+}
+
+// Number of tokens in `src`. A run of digits collapses into one `num` token,
+// each operator or parenthesis byte is one token, runs of spaces produce
+// none, and every unrecognised byte produces exactly one `bad` token.
+pub fn token_count(src: Span<u8>) -> usize {
+    let len: usize = std.mem.len(src)
+    var index: usize = 0
+    var count: usize = 0
+    var steps: usize = 0
+    while index < len {
+        if steps >= scan_budget {
+            break
+        }
+        steps = steps + 1
+        let byte: u8 = src[index]
+        if is_space(byte) {
+            index = index + 1
+            continue
+        }
+        if is_digit(byte) {
+            index = number_end(src, index)
+            count = count + 1
+            continue
+        }
+        index = index + 1
+        count = count + 1
+    }
+    return count
+}
+
+// Total of every numeric literal in `src`. Non-numeric bytes are stepped
+// over one at a time; a digit run is consumed whole, so its digits are never
+// counted twice and the cursor always advances.
+pub fn sum_numbers(src: Span<u8>) -> i64 {
+    let len: usize = std.mem.len(src)
+    var index: usize = 0
+    var total: i64 = 0
+    var steps: usize = 0
+    while index < len {
+        if steps >= scan_budget {
+            break
+        }
+        steps = steps + 1
+        if is_digit(src[index]) == false {
+            index = index + 1
+            continue
+        }
+        let stop: usize = number_end(src, index)
+        total = total + number_value(src, index, stop)
+        index = stop
+    }
+    return total
+}
+
+// Number of bytes that classify as `bad`: neither a digit, nor one of the
+// six operator and parenthesis bytes, nor a separator.
+pub fn bad_count(src: Span<u8>) -> usize {
+    let len: usize = std.mem.len(src)
+    var index: usize = 0
+    var bad: usize = 0
+    while index < len {
+        let byte: u8 = src[index]
+        if is_space(byte) == false && classify(byte) == kind_bad {
+            bad = bad + 1
+        }
+        index = index + 1
+    }
+    return bad
+}
+
+// Number of operator tokens, parentheses excluded.
+pub fn operator_count(src: Span<u8>) -> usize {
+    let len: usize = std.mem.len(src)
+    var index: usize = 0
+    var found: usize = 0
+    while index < len {
+        if is_operator(classify(src[index])) {
+            found = found + 1
+        }
+        index = index + 1
+    }
+    return found
+}
+
+pub fn main(world: World) -> Void raises {
+    // A well-formed expression: 11 tokens, and 12 + 34 + 5 + 6 + 7 = 64.
+    let counted: usize = token_count("12 + 34 * (5 - 6) / 7")
+    let total: i64 = sum_numbers("12 + 34 * (5 - 6) / 7")
+    let operators: usize = operator_count("12 + 34 * (5 - 6) / 7")
+    let report: Scan = Scan { kind: kind_at("12 + 34", 0), total: total }
+
+    // The cursor past the last byte reports `end`, not a token kind.
+    let past_end: i32 = kind_at("12 + 34", 7)
+
+    // A malformed expression: `?` is one `bad` token beside the two numbers.
+    let bad: usize = bad_count("1 ? 2")
+    let bad_tokens: usize = token_count("1 ? 2")
+
+    if counted == 11 && total == 64 && operators == 4 {
+        if report.kind == kind_num && report.total == 64 && past_end == kind_end {
+            if bad == 1 && bad_tokens == 3 {
+                check world.out.write("lexer ok\n")
+            }
+        }
+    }
+}

@@ -1,0 +1,34 @@
+use lib
+
+fn add(left: i32, right: i32) -> i32 {
+    return left + right
+}
+
+fn mul(left: i32, right: i32) -> i32 {
+    return left * right
+}
+
+// Evaluates x*x + 3*x + 7 using only the two pure helpers above.
+fn poly(x: i32) -> i32 {
+    return add(mul(x, x), add(mul(3, x), 7))
+}
+
+pub fn main(world: World) -> Void raises {
+    if poly(2) == scale() {
+        check world.out.write("arith ok\n")
+    }
+}
+
+test "poly at two matches the shared scale" {
+    expect poly(2) == 17
+    expect poly(2) == scale()
+}
+
+test "add sums both operands" {
+    expect add(40, 2) == 42
+}
+
+test "mul feeds nested calls" {
+    expect mul(3, 2) == 6
+    expect add(mul(2, 2), 13) == 17
+}

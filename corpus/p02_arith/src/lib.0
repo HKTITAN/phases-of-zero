@@ -1,0 +1,4 @@
+// Shared constant used as the expected value of the polynomial at x = 2.
+pub fn scale() -> i32 {
+    return 17
+}

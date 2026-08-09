@@ -1,0 +1,18 @@
+// Scalar helpers shared by the shape, enum, and choice code in src/main.0.
+
+pub fn abs_i32(value: i32) -> i32 {
+    if value < 0 {
+        return 0 - value
+    }
+    return value
+}
+
+// Score carried out of the Outcome.ok arm: a walk that fit its budget.
+pub fn reached(distance: i32) -> i32 {
+    return abs_i32(distance)
+}
+
+// Score carried out of the Outcome.err arm: an overrun charged as a penalty.
+pub fn penalty(overrun: i32) -> i32 {
+    return 0 - abs_i32(overrun)
+}

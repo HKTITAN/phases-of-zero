@@ -1,0 +1,1 @@
+{"phase":"target","intent":"Networking is legal on the host but linux-musl-x64 declares no net capability.","expectedCode":"TAR002","target":"linux-musl-x64"}

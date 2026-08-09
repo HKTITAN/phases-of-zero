@@ -1,0 +1,1 @@
+{"phase":"syntax","intent":"Every token is legal; the nesting is not. Block is never closed.","expectedCode":"PAR100"}

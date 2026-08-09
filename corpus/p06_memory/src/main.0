@@ -1,0 +1,57 @@
+use lib
+use std.mem
+use std.testing
+
+pub fn main(world: World) -> Void raises {
+    // Fixed-size storage owned by this frame.
+    var storage: [4]u8 = [1, 2, 3, 4]
+
+    // A writable view borrows that storage; std.mem.copy writes through the view.
+    let writable: MutSpan<u8> = storage
+    let copied: usize = std.mem.copy(writable, std.mem.span("zero"))
+
+    // While the view is live, element writes go through it rather than around it.
+    writable[0] = 9
+
+    // A read-only view over the very same bytes, read three ways.
+    let view: Span<u8> = storage
+    let first: u8 = view[0]
+    let last: u8 = byte_at(view, 3)
+    let head: u32 = head_checksum(view, 2)
+    let total: u32 = checksum(view)
+
+    // A shape mutated through a mutable borrow, then read through a shared one.
+    var origin: Vec2 = Vec2 { x: 1, y: 2 }
+    bump(&mut origin)
+    let sum: i32 = manhattan(&origin)
+
+    let view_ok: Bool = copied == 4 && std.mem.len(view) == 4 && first == 9 && last == 111
+    let sums_ok: Bool = head == 110_u32 && total == 335_u32
+    if view_ok && sums_ok && sum == 6 {
+        check world.out.write("memory ok\n")
+    }
+}
+
+test "bump applies one step per axis" {
+    expect step_x(10) == 11
+    expect step_y(20) == 22
+    expect step_x(step_y(0)) == 3
+}
+
+test "checksum accumulates one byte at a time" {
+    expect accumulate(0, 9) == 9_u32
+    expect accumulate(accumulate(0, 9), 101) == 110_u32
+    expect accumulate(110_u32, 114) == 224_u32
+}
+
+test "a narrowed view must fit its backing storage" {
+    expect fits(2, 4)
+    expect fits(4, 4)
+    expect fits(5, 4) == false
+}
+
+test "byte views compare by content" {
+    expect std.mem.eql("zero", "zero")
+    expect std.testing.equalBytes("zero", "zero")
+    expect std.testing.containsBytes("zerolang", "lang")
+}

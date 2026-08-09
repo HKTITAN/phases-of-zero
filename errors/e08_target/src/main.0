@@ -1,0 +1,3 @@
+pub fn main(world: World) -> Void raises {
+    check std.http.listen(world, 3000_u16)
+}

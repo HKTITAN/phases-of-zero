@@ -1,0 +1,1 @@
+{"phase":"check","intent":"One function's fixed locals exceed the 128 KiB frame budget.","expectedCode":"MEM003"}

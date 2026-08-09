@@ -1,0 +1,53 @@
+use lib
+
+// A fallible function with a closed error set: Odd is the only failure it can
+// report. Even inputs return normally, odd inputs raise.
+fn even_or_raise(i: i32) -> i32 raises [Odd] {
+    if is_even(i) {
+        return i
+    }
+    raise Odd
+}
+
+// Propagating caller. `check` forwards Odd into this function's own error set,
+// so doubling stays fallible for exactly the same reason its callee is.
+fn double_even(i: i32) -> i32 raises [Odd] {
+    let value: i32 = check even_or_raise(i)
+    return value + value
+}
+
+// Total mirror of "call even_or_raise, then rescue Odd". The graph test runner
+// evaluates only the total subset of the language, so the tests below assert
+// the recovery contract through this function instead of rescuing directly.
+fn even_or_fallback(i: i32) -> i32 {
+    if is_even(i) {
+        return i
+    }
+    return odd_fallback()
+}
+
+pub fn main(world: World) -> Void raises {
+    // Rescued path: 7 is odd, so Odd is absorbed and the fallback stands in.
+    let recovered: i32 = rescue even_or_raise(7) err 0
+
+    // Checked path: 20 is even, so the value flows out through both frames.
+    let doubled: i32 = check double_even(20)
+
+    if recovered == even_or_fallback(7) && doubled == 40 {
+        check world.out.write("errors ok\n")
+    }
+}
+
+test "the parity guard decides which inputs raise" {
+    expect is_even(20)
+    expect !is_even(7)
+}
+
+test "an odd input lands on the shared fallback" {
+    expect even_or_fallback(7) == odd_fallback()
+    expect even_or_fallback(7) == 0
+}
+
+test "an even input passes through unchanged" {
+    expect even_or_fallback(20) == 20
+}

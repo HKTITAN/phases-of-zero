@@ -1,0 +1,4 @@
+pub fn main(world: World) -> Void raises {
+    let total: i32 = compute_checksum(7)
+    check world.out.write("unreachable\n")
+}

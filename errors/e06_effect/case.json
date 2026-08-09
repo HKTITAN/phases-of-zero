@@ -1,0 +1,1 @@
+{"phase":"check","intent":"world.out.write is fallible; calling it bare skips the effect discipline.","expectedCode":"EFF"}

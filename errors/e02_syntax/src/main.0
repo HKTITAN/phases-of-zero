@@ -1,0 +1,4 @@
+pub fn main(world: World) -> Void raises {
+    if true {
+        check world.out.write("missing a closing brace\n")
+}

@@ -1,0 +1,5 @@
+// Maximum number of iterations `count_down` is allowed to spend before its
+// break guard trips. Shared so main and the tests agree on one number.
+pub fn limit() -> i32 {
+    return 8
+}

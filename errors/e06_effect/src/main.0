@@ -1,0 +1,3 @@
+pub fn main(world: World) -> Void raises {
+    world.out.write("fallible call with no check\n")
+}

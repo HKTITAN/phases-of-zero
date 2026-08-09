@@ -1,0 +1,171 @@
+// Token model and byte-level classification for the arithmetic tokenizer.
+//
+// `TokKind` names the nine kinds the scanner can produce and `Token` pairs a
+// kind with the value a numeric literal decoded to. Both are the declared
+// model of the tokenizer. zero 0.3.4's direct backend cannot lower an enum
+// value through a parameter, local, or return slot (BLD004), so the scanner
+// carries the parallel `kind_*` codes below: one code per variant, in the
+// same declaration order, so the two stay readable side by side.
+
+pub enum TokKind {
+    num,
+    plus,
+    minus,
+    star,
+    slash,
+    lparen,
+    rparen,
+    end,
+    bad,
+}
+
+pub type Token {
+    kind: TokKind,
+    value: i64,
+}
+
+// Runtime encoding of TokKind, one code per variant.
+pub const kind_num: i32 = 0
+pub const kind_plus: i32 = 1
+pub const kind_minus: i32 = 2
+pub const kind_star: i32 = 3
+pub const kind_slash: i32 = 4
+pub const kind_lparen: i32 = 5
+pub const kind_rparen: i32 = 6
+pub const kind_end: i32 = 7
+pub const kind_bad: i32 = 8
+
+// ASCII bytes the scanner recognises, named so the classifier below reads as
+// prose instead of as a table of magic numbers.
+pub const byte_tab: u8 = 9
+pub const byte_newline: u8 = 10
+pub const byte_return: u8 = 13
+pub const byte_space: u8 = 32
+pub const byte_lparen: u8 = 40
+pub const byte_rparen: u8 = 41
+pub const byte_star: u8 = 42
+pub const byte_plus: u8 = 43
+pub const byte_minus: u8 = 45
+pub const byte_slash: u8 = 47
+pub const byte_zero: u8 = 48
+pub const byte_nine: u8 = 57
+
+// Hard ceiling on scanner iterations for one input. Every scan loop is
+// already bounded by the span length; this second bound makes the budget
+// explicit at the top of the file rather than implicit in each loop.
+pub const scan_budget: usize = 4096
+
+// True for the ten decimal digit bytes and nothing else.
+pub fn is_digit(byte: u8) -> Bool {
+    return byte >= byte_zero && byte <= byte_nine
+}
+
+// True for the separators the scanner drops between tokens.
+pub fn is_space(byte: u8) -> Bool {
+    if byte == byte_space || byte == byte_tab {
+        return true
+    }
+    return byte == byte_newline || byte == byte_return
+}
+
+// Numeric value of one digit byte. Non-digits answer 0, so callers that
+// already guarded with `is_digit` read cleanly and stray bytes stay harmless.
+pub fn digit_value(byte: u8) -> u8 {
+    if is_digit(byte) {
+        return byte - byte_zero
+    }
+    return 0
+}
+
+// Kind of a single byte. Digits open a number, the six single-byte operators
+// and parentheses map to their own kinds, and everything else is `bad`.
+// Whitespace also answers `bad`: it is not a token, and the scanner drops it
+// with `is_space` before it ever reaches this function.
+pub fn classify(byte: u8) -> i32 {
+    if is_digit(byte) {
+        return kind_num
+    }
+    if byte == byte_plus {
+        return kind_plus
+    }
+    if byte == byte_minus {
+        return kind_minus
+    }
+    if byte == byte_star {
+        return kind_star
+    }
+    if byte == byte_slash {
+        return kind_slash
+    }
+    if byte == byte_lparen {
+        return kind_lparen
+    }
+    if byte == byte_rparen {
+        return kind_rparen
+    }
+    return kind_bad
+}
+
+// True for the four binary operator kinds.
+pub fn is_operator(kind: i32) -> Bool {
+    if kind == kind_plus || kind == kind_minus {
+        return true
+    }
+    return kind == kind_star || kind == kind_slash
+}
+
+// True for the two grouping kinds.
+pub fn is_paren(kind: i32) -> Bool {
+    return kind == kind_lparen || kind == kind_rparen
+}
+
+// Folds one more digit into a decimal literal being read left to right.
+pub fn accumulate(total: i64, digit: i64) -> i64 {
+    return total * 10 + digit
+}
+
+test "decimal digits open a number token" {
+    expect is_digit(byte_zero)
+    expect is_digit(byte_nine)
+    expect is_digit(53_u8)
+    expect is_digit(47_u8) == false
+    expect is_digit(58_u8) == false
+    expect classify(byte_zero) == kind_num
+    expect classify(55_u8) == kind_num
+}
+
+test "single-byte operators map to their own kinds" {
+    expect classify(byte_plus) == kind_plus
+    expect classify(byte_minus) == kind_minus
+    expect classify(byte_star) == kind_star
+    expect classify(byte_slash) == kind_slash
+    expect classify(byte_lparen) == kind_lparen
+    expect classify(byte_rparen) == kind_rparen
+    expect is_operator(classify(byte_star))
+    expect is_paren(classify(byte_rparen))
+    expect is_operator(classify(byte_lparen)) == false
+}
+
+test "multi-digit numbers fold left to right" {
+    expect digit_value(byte_zero) == 0
+    expect digit_value(53_u8) == 5
+    expect digit_value(byte_nine) == 9
+    expect digit_value(byte_plus) == 0
+    expect accumulate(0, 1) == 1
+    expect accumulate(accumulate(0, 1), 2) == 12
+    expect accumulate(accumulate(accumulate(0, 1), 2), 3) == 123
+    expect accumulate(accumulate(0, 4), 0) == 40
+}
+
+test "unrecognised bytes are bad and spaces are not tokens" {
+    expect classify(63_u8) == kind_bad
+    expect classify(64_u8) == kind_bad
+    expect classify(97_u8) == kind_bad
+    expect classify(byte_space) == kind_bad
+    expect is_space(byte_space)
+    expect is_space(byte_tab)
+    expect is_space(byte_newline)
+    expect is_space(byte_plus) == false
+    expect is_operator(kind_bad) == false
+    expect is_paren(kind_bad) == false
+}

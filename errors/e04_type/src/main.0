@@ -1,0 +1,8 @@
+fn width() -> i32 {
+    return 42
+}
+
+pub fn main(world: World) -> Void raises {
+    let label: String = width()
+    check world.out.write(label)
+}

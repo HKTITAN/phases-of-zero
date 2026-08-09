@@ -1,0 +1,11 @@
+// Total parity guard. It declares no error set, so the fallible function in
+// src/main.0 can branch on it without `check` or `rescue`.
+pub fn is_even(i: i32) -> Bool {
+    return i % 2 == 0
+}
+
+// The value an Odd failure is folded onto. Exporting it keeps the rescue
+// fallback and every assertion that reads it in one place.
+pub fn odd_fallback() -> i32 {
+    return 0
+}

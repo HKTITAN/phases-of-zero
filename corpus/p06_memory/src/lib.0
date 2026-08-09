@@ -1,0 +1,64 @@
+use std.mem
+
+// A small shape that callers keep in their own frame and lend out by reference.
+pub type Vec2 {
+    x: i32,
+    y: i32,
+}
+
+// The per-axis steps bump applies, factored out so they can be pinned directly.
+pub fn step_x(x: i32) -> i32 {
+    return x + 1
+}
+
+pub fn step_y(y: i32) -> i32 {
+    return y + 2
+}
+
+// Mutable borrow: the callee writes through the reference into the caller's value.
+pub fn bump(point: mutref<Vec2>) -> Void {
+    point.x = step_x(point.x)
+    point.y = step_y(point.y)
+}
+
+// Read-only borrow: fields may be read, never written.
+pub fn manhattan(point: ref<Vec2>) -> i32 {
+    return point.x + point.y
+}
+
+// One accumulation step; the span loop below applies it once per element.
+pub fn accumulate(total: u32, byte: u32) -> u32 {
+    return total + byte
+}
+
+// Read-only view: length and elements are readable, ownership stays with the caller.
+pub fn checksum(bytes: Span<u8>) -> u32 {
+    var total: u32 = 0
+    var i: usize = 0
+    while i < std.mem.len(bytes) {
+        total = accumulate(total, bytes[i] as u32)
+        i = i + 1
+    }
+    return total
+}
+
+// The guard that keeps a narrowed view inside its backing storage.
+pub fn fits(len: usize, capacity: usize) -> Bool {
+    return len <= capacity
+}
+
+// Narrowing a view yields another view over the same bytes, never a copy.
+pub fn head_checksum(bytes: Span<u8>, len: usize) -> u32 {
+    if fits(len, std.mem.len(bytes)) == false {
+        return 0
+    }
+    return checksum(std.mem.prefix(bytes, len))
+}
+
+// Indexing traps on an out-of-range index, so the guard runs before the read.
+pub fn byte_at(bytes: Span<u8>, index: usize) -> u8 {
+    if fits(index + 1, std.mem.len(bytes)) == false {
+        return 0
+    }
+    return bytes[index]
+}

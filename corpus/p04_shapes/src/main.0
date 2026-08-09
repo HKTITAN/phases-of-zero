@@ -1,0 +1,82 @@
+// A grid walk scored against a per-mode step budget.
+//
+// Zero 0.3.4 checks shapes, enums, choices, and exhaustive `match` in the
+// frontend, but its direct backend lowers only the functions reachable from
+// `main`, and that MIR subset has no `Match` statement and no enum or choice
+// parameters (BLD004). `budget` and `settle` are therefore proved by
+// `zero check`, while `main` reproduces the same per-arm scores through the
+// scalar helpers in src/lib.0 that each arm returns.
+
+use lib
+
+const fast_budget: i32 = 64
+const small_budget: i32 = 8
+
+type Point {
+    x: i32,
+    y: i32,
+}
+
+enum Mode {
+    fast,
+    small,
+}
+
+choice Outcome {
+    ok: i32,
+    err: i32,
+}
+
+// A shape crosses a function boundary as a read-only borrow.
+fn manhattan(p: ref<Point>) -> i32 {
+    return abs_i32(p.x) + abs_i32(p.y)
+}
+
+// Exhaustive match over the enum: one step budget per mode.
+fn budget(mode: Mode) -> i32 {
+    match mode {
+        .fast {
+            return fast_budget
+        }
+        .small {
+            return small_budget
+        }
+    }
+}
+
+// Exhaustive match over the choice: one score per arm.
+fn settle(outcome: Outcome) -> i32 {
+    match outcome {
+        .ok(walked) {
+            return reached(walked)
+        }
+        .err(overrun) {
+            return penalty(overrun)
+        }
+    }
+}
+
+pub fn main(world: World) -> Void raises {
+    let near: Point = Point { x: 3, y: -4 }
+    let far: Point = Point { x: 40, y: 40 }
+    let near_score: i32 = reached(manhattan(&near))
+    let far_score: i32 = penalty(manhattan(&far) - small_budget)
+    if near_score == 7 && far_score == -72 {
+        check world.out.write("shapes ok\n")
+    }
+}
+
+test "the ok arm keeps the distance that fit the budget" {
+    expect reached(7) == 7
+    expect reached(0) == 0
+}
+
+test "the err arm charges the overrun as a penalty" {
+    expect penalty(72) == -72
+    expect penalty(1) == -1
+}
+
+test "manhattan adds absolute offsets" {
+    expect abs_i32(-4) == 4
+    expect abs_i32(3) + abs_i32(-4) == 7
+}

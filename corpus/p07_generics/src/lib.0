@@ -1,0 +1,19 @@
+// One generic container definition, reused at every concrete element type.
+pub type Box<T: Type> {
+    value: T,
+}
+
+// Identity: a function that is generic over its entire signature.
+pub fn id<T: Type>(value: T) -> T {
+    return value
+}
+
+// The element values the program boxes, kept here so main and the
+// test blocks agree on what each instantiation should hold.
+pub fn seed_count() -> i32 {
+    return 7
+}
+
+pub fn seed_flag() -> Bool {
+    return true
+}

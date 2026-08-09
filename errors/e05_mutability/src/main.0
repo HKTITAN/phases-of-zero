@@ -1,0 +1,14 @@
+type Point {
+    x: i32,
+    y: i32,
+}
+
+fn bump(p: mutref<Point>) -> Void {
+    p.x = p.x + 1
+}
+
+pub fn main(world: World) -> Void raises {
+    let fixed: Point = Point { x: 1, y: 2 }
+    bump(&mut fixed)
+    check world.out.write("unreachable\n")
+}

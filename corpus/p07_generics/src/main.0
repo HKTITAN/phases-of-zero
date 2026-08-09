@@ -1,0 +1,35 @@
+use lib
+
+// Box<i32>: the container instantiated at a numeric element type.
+fn boxed_count() -> i32 {
+    let counter: Box<i32> = Box { value: seed_count() }
+    let count: i32 = counter.value
+    return id(count)
+}
+
+// Box<Bool>: the same container instantiated at a boolean element type.
+fn boxed_flag() -> Bool {
+    let toggle: Box<Bool> = Box { value: seed_flag() }
+    let flag: Bool = toggle.value
+    return id(flag)
+}
+
+pub fn main(world: World) -> Void raises {
+    if boxed_count() == 7 && boxed_flag() {
+        check world.out.write("generics ok\n")
+    }
+}
+
+test "id instantiated at i32" {
+    expect id(seed_count()) == 7
+    expect id(11) == 11
+}
+
+test "id instantiated at Bool" {
+    expect id(seed_flag())
+    expect id(true)
+}
+
+test "both boxes carry the seeded elements" {
+    expect seed_count() == 7 && seed_flag()
+}
