@@ -11,7 +11,8 @@
     "epub": "node tools/epub.mjs",
     "previews": "node tools/previews.mjs",
     "assets": "node tools/assets.mjs",
-    "paper": "npm run capture && npm run qr && npm --prefix web run build && npm run pdf && npm run epub && npm run previews && npm run assets && npm --prefix web run build"
+    "paper": "npm run capture && npm run qr && npm run fidelity && npm --prefix web run build && npm run pdf && npm run epub && npm run previews && npm run assets && npm --prefix web run build",
+    "fidelity": "node tools/lexer-fidelity.mjs"
   },
   "devDependencies": {
     "jszip": "^3.10.1",

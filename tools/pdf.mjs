@@ -149,14 +149,19 @@ try {
     printBackground: true,
     preferCSSPageSize: true, // honour the @page rule in globals.css
     displayHeaderFooter: true,
-    headerTemplate: '<div></div>',
-    footerTemplate: `
-      <div style="width:100%;font-family:ui-sans-serif,system-ui,sans-serif;font-size:7.5pt;
-                  color:#666;padding:0 16mm;display:flex;justify-content:space-between;">
-        <span>Phases of Compiler Design — Khemani, Ahuja, Mishra, Agrawal</span>
-        <span>zero.khe.money · <span class="pageNumber"></span>/<span class="totalPages"></span></span>
+    // Running head and folio only. Anything more competes with the content for
+    // attention on every one of thirty pages.
+    headerTemplate: `
+      <div style="width:100%;font-family:ui-sans-serif,system-ui,sans-serif;font-size:8pt;
+                  color:#8a8a8a;text-align:center;padding:0 16mm;">
+        Phases of Compiler Design
       </div>`,
-    margin: { top: '16mm', bottom: '18mm', left: '16mm', right: '16mm' },
+    footerTemplate: `
+      <div style="width:100%;font-family:ui-sans-serif,system-ui,sans-serif;font-size:8pt;
+                  color:#8a8a8a;text-align:center;padding:0 16mm;">
+        <span class="pageNumber"></span>
+      </div>`,
+    margin: { top: '18mm', bottom: '16mm', left: '16mm', right: '16mm' },
   })
 
   await browser.close()
