@@ -406,15 +406,62 @@ main { overflow-x: clip; }
    inline display would win against any selector. */
 .rail-preview { display: block; }
 
+/* The menu button only exists on the narrow layout. On the wide one the
+   contents are already open beside the reader. */
+.rail-toggle { display: none; }
+
 @media (max-width: 1080px) {
   .with-rail { grid-template-columns: minmax(0, 1fr); }
+
+  /* The rail becomes a bar. It stays sticky so the contents stay reachable from
+     anywhere in a long paper, but it now costs one row instead of a screenful. */
   .reading-rail {
-    position: static;
+    position: sticky;
+    top: 0;
+    z-index: 30;
     max-height: none;
     overflow: visible;
-    grid-auto-flow: row;
-    padding-bottom: 1.25rem;
+    gap: 0.5rem;
+    padding-block: 0.5rem;
+    padding-bottom: 0.625rem;
     border-bottom: var(--rule);
+    /* Opaque: the article scrolls underneath it. */
+    background: var(--bg);
+  }
+
+  .rail-toggle { display: inline-flex; width: 100%; justify-content: flex-start; }
+
+  /* The contents collapse behind the button.
+
+     Height is NOT animated. The `grid-template-rows: 0fr → 1fr` trick does not
+     resolve in an auto-height container here — `1fr` computes to 0px — and the
+     alternatives all animate a layout property, which the motion rules exclude.
+     So the panel takes its space instantly and only its appearance is animated,
+     with opacity and a small translate. That is the honest version: the layout
+     move is immediate, and nothing pretends to be a compositor animation. */
+  .reading-rail nav {
+    display: none;
+    padding-right: 0;
+  }
+
+  .reading-rail[data-menu-open="true"] nav {
+    display: block;
+    animation: railOpen var(--dur-enter) var(--ease-out) both;
+  }
+
+  @keyframes railOpen {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Its own heading is redundant once the button says "Contents". */
+  .rail-heading { display: none; }
+
+  /* The list scrolls inside the bar rather than growing past the viewport. */
+  .reading-rail[data-menu-open="true"] nav ol {
+    max-height: min(58vh, 420px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   /* On a narrow screen the rail sits above the paper, so the download row reads
      better horizontally than as a stack.
@@ -850,14 +897,22 @@ li:target { background: var(--accent-quiet); border-radius: 3px; }
 .file-ref-foot { border-top: 1px solid var(--border-faint); }
 
 .file-ref-body { display: block; max-height: 220px; overflow: hidden; }
-.file-ref-body pre {
+
+/* Does the job <pre> would do, from an element that is legal inside a <p>.
+   The preview is an excerpt, so long lines are clipped rather than wrapped —
+   the shape of the code survives, and the card keeps a predictable width. */
+.file-ref-code {
+  display: block;
   padding: 0.625rem 0.75rem;
+  font-family: var(--font-mono);
   font-size: 0.6875rem;
   line-height: 1.55;
-  /* The preview is an excerpt; long lines are clipped rather than wrapped so
-     the shape of the code survives. */
   white-space: pre;
   overflow: hidden;
+  /* Reset the inline-code chrome inherited from `code:not(pre code)`. */
+  background: none;
+  border: 0;
+  border-radius: 0;
 }
 
 /* On paper a reference is just its name, and a hover card cannot exist. */
@@ -955,8 +1010,8 @@ li:target { background: var(--accent-quiet); border-radius: 3px; }
 
      Components set their own `minHeight` inline, and an inline style beats a
      stylesheet rule — so the floor has to be `!important` to reach them. That is
-     the justified use of it: an accessibility minimum overriding a component's
-     own smaller choice, in one place, at one breakpoint. */
+     the justified use of it: an accessibility minimum overriding a smaller value
+     chosen by a component, in one place, at one breakpoint. */
   main button,
   main select,
   main summary,

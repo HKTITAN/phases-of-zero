@@ -121,6 +121,11 @@ const PATHS = {
   cross: <path d="M6.5 6.5L17.5 17.5M17.5 6.5L6.5 17.5" />,
   minus: <path d="M5.5 12H18.5" />,
 
+  /* The contents menu. Three rules on the same 6.5-unit pitch as `layers`, with
+     the middle one short — a plain three-bar mark reads as a generic hamburger,
+     and the stepped edge says "a list" rather than "a menu of anything". */
+  menu: <path d="M4.5 6.5H19.5M4.5 12H14.5M4.5 17.5H19.5" />,
+
   /* ------------------------------------------------------------- measurement */
 
   clock: (

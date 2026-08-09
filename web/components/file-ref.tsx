@@ -110,8 +110,14 @@ export function FileRef({
           <span className="mono">{program}/{file}</span>
           <span className="meta">{source.nonEmptyLines} lines</span>
         </span>
+        {/* A <pre> would be invalid here. The reference sits inside a <p>, and
+            HTML forbids a block element there — the browser silently closes the
+            paragraph before it, so the server markup and the client DOM diverge
+            and hydration fails. Every element in this card is therefore phrasing
+            content, with `white-space: pre` on a span doing the work <pre> would
+            have done. */}
         <span className="file-ref-body">
-          <pre><code>{excerpt}</code></pre>
+          <code className="file-ref-code">{excerpt}</code>
         </span>
         <span className="file-ref-foot">
           <span className="meta">

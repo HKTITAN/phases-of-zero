@@ -176,6 +176,24 @@ export function Sidebar({
 }) {
   const [active, setActive] = useState<string>(entries[0]?.id ?? '')
 
+  /* Below the rail breakpoint the contents cannot sit beside the article, and
+     stacking nineteen links above it means scrolling past a table of contents
+     to reach the paper. On those widths the rail becomes a bar with a menu
+     button, and this holds whether that menu is open.
+
+     It is deliberately NOT a modal: the panel pushes nothing, traps nothing and
+     dims nothing. It is a disclosure, so the page behind it stays readable and
+     Escape or a second press closes it. */
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  // Escape closes, which is what any transient panel over content should do.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
   useEffect(() => {
     const targets = entries
       .map((e) => document.getElementById(e.id))
@@ -201,10 +219,28 @@ export function Sidebar({
   return (
     <aside
       className="reading-rail no-print"
+      data-menu-open={menuOpen ? 'true' : 'false'}
       aria-label="Paper contents and downloads"
     >
-      <nav aria-label="Contents">
-        <p className="label" style={{ margin: '0 0 0.5rem', fontSize: '0.6875rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+      {/* The compact control. CSS shows it only below the rail breakpoint, so a
+          desktop reader never sees a menu button for a menu that is already
+          open beside them. */}
+      <button
+        type="button"
+        className="btn rail-toggle"
+        aria-expanded={menuOpen}
+        aria-controls="rail-contents"
+        onClick={() => { setMenuOpen((v) => !v); play('toggle') }}
+      >
+        <Icon name={menuOpen ? 'cross' : 'menu'} size={16} />
+        Contents
+        <span className="meta" style={{ marginLeft: 'auto', fontSize: '0.6875rem' }}>
+          {entries.length} sections
+        </span>
+      </button>
+
+      <nav aria-label="Contents" id="rail-contents">
+        <p className="label rail-heading" style={{ margin: '0 0 0.5rem', fontSize: '0.6875rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
           Contents
         </p>
         <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
@@ -215,7 +251,7 @@ export function Sidebar({
                 <a
                   href={`#${e.id}`}
                   aria-current={current ? 'true' : undefined}
-                  onClick={() => play('select')}
+                  onClick={() => { play('select'); setMenuOpen(false) }}
                   className="rail-link"
                   data-current={current ? 'true' : undefined}
                 >
